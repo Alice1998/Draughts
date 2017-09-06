@@ -1,0 +1,208 @@
+#ifndef DRAUGHTS_H
+#define DRAUGHTS_H
+
+#include <QWidget>
+#include <QPushButton>
+#include <QPainter>
+#include <QEvent>
+#include <QPaintEvent>
+#include <QSignalMapper>
+#include <QDebug>
+#include "chessbutton.h"
+
+namespace Ui {
+class Draughts;
+}
+
+class Draughts : public QWidget
+{
+    Q_OBJECT
+
+public:
+    explicit Draughts(QWidget *parent = 0);
+    ~Draughts();
+    int clickedbutton[100];
+     Chessbutton *chessboard=new Chessbutton(this);
+     int havechoose=0;
+     int chesscolor=3;//black
+     int win();
+
+     int nextbuttonx[4];
+     int nextbuttony[4];
+     int nextcount=4;
+     int nextdown=0;
+     int nextup=0;
+
+
+public slots:
+    void boardbuttonclicked(int);
+
+private:
+    Ui::Draughts *ui;
+    QPushButton ***button;
+
+    QSignalMapper *m = new QSignalMapper(this);
+    int checknext(int x,int y,int choose);
+
+    void getnextbutton(int x,int y);
+
+
+    //void paintEvent(QPaintEvent *ev);
+    //int chess[10][10];
+   // QWidget *picture=new QWidget;
+};
+
+#endif // DRAUGHTS_H
+
+
+
+
+
+
+
+#include "draughts.h"
+#include "ui_draughts.h"
+#include <QGridLayout>
+
+Draughts::Draughts(QWidget *parent) :
+    QWidget(parent),
+    ui(new Ui::Draughts)
+{
+    ui->setupUi(this);
+
+    for(int i=0;i<100;i++)
+        clickedbutton[i]=-1;
+    button=new QPushButton**[10];
+    QGridLayout *layout=new QGridLayout(this);
+    for(int i=0;i<10;i++)
+        for(int j=0;j<10;j++)
+            chessboard->chess[i][j]=0;
+
+    for(int i=0;i<4;i++)
+    {
+        nextbuttonx[i]=-1;
+        nextbuttony[i]=-1;
+    }
+    for(int i=0;i<10;i++)
+    {
+        button[i]=new QPushButton*[10];
+        for(int j=0;j<10;j++)
+        {
+            button[i][j]=new QPushButton;
+            button[i][j]->setFixedSize(80,80);
+            button[i][j]->setAccessibleName(QString::number(i*10+j));
+            layout->addWidget(button[i][j],i,j);
+            if(i%2==0&&j%2==1||i%2==1&&j%2==0)
+            {
+                button[i][j]->setStyleSheet("background-color:#a0646e");
+                if(i<4)
+                    chessboard->chess[i][j]=1;//black
+                if(i>5)
+                    chessboard->chess[i][j]=2;//white
+                connect(button[i][j], SIGNAL(clicked()), m, SLOT(map()));
+                m->setMapping(button[i][j],i*10+j);
+
+
+            }
+            else
+                button[i][j]->setStyleSheet("background-color:#dcba97");
+
+        }
+
+    }
+    connect(m, SIGNAL(mapped(int)), this, SLOT(boardbuttonclicked(int)));
+
+    layout->setVerticalSpacing(0);
+    layout->setHorizontalSpacing(0);
+    layout->setMargin(30);
+    chessboard->raise();
+    repaint();
+}
+
+Draughts::~Draughts()
+{
+    delete ui;
+}
+
+void Draughts::boardbuttonclicked(int num)
+{
+    int x=num/10;
+    int y=num%10;
+    if((chesscolor-chessboard->chess[num/10][num%10])%2==0&&
+            chessboard->chess[num/10][num%10]!=0
+            &&chessboard->chess[num/10][num%10]<5)//choose
+    {
+        clickedbutton[0]=num;
+        havechoose=1;
+
+        int nextnumber=checknext(x,y,1);
+        //qDebug()<<num;
+
+    }
+    if(havechoose==1&&(chesscolor-chessboard->chess[num/10][num%10])%2!=0)//!!!!where to go
+    {
+
+        chesscolor++;
+    }
+
+
+
+}
+void Draughts::getnextbutton(int x, int y)
+{
+    nextcount=0;
+    nextdown=0;
+    nextup=0;
+    if(x>0&&y>0)
+    {
+        nextbuttonx[nextcount]=x-1,nextbuttony[nextcount]=y-1;
+        nextcount++;
+        nextup++;
+    }
+    if(x>0&&y<9)
+        nextbuttonx[nextcount]=x-1,nextbuttony[nextcount]=y+1,nextcount++,nextup++;
+    if(x<9&&y>0)
+        nextbuttonx[nextcount]=x+1,nextbuttony[nextcount]=y-1,nextcount++,nextdown++;
+    if(x<9&&y<9)
+        nextbuttonx[nextcount]=x+1,nextbuttony[nextcount]=y+1,nextcount++,nextdown++;
+}
+
+int Draughts::checknext(int x,int y,int choose)
+{
+    bool conti=false;
+    int eat=0;
+    getnextbutton(x,y);
+
+    if(choose==1)
+    {
+
+        
+    }
+
+
+    return 1;
+}
+int Draughts::win()
+{
+    int check=(chesscolor+1)%2;//+++++++++++++++
+    int flag[2]={0};
+    {
+        for(int i=0;i<10;i++)
+        {
+            for(int j=0;j<10;j++)
+            {
+                if(chessboard->chess[i][j]==1&&checknext(i,j,0)!=0)
+                    flag[1]=1;//black not lose
+                if(chessboard->chess[i][j]==2&&checknext(i,j,0)!=0)
+                    flag[0]=1; //white not lose
+            }
+        }
+    }
+    if(flag[check]==0)
+       return (check+1)%2;
+    if(flag[(check+1)%2]==0)
+        return check;
+
+    return 0;
+}
+
