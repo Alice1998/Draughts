@@ -1,0 +1,105 @@
+#ifndef CHESSBUTTON_H
+#define CHESSBUTTON_H
+
+#include <QWidget>
+#include <QPushButton>
+
+
+namespace Ui {
+class Chessbutton;
+}
+
+class Chessbutton : public QWidget
+{
+    Q_OBJECT
+
+public:
+    explicit Chessbutton(QWidget *parent = 0);
+    ~Chessbutton();
+    int chess[10][10];//1black 2white 3 4eaten unleave 5 6king
+    
+    
+    int lightnextx[20];
+    int lightnexty[20];
+    int lightnum=-1;
+    //QPushButton *b=new QPushButton(this);
+
+private:
+    Ui::Chessbutton *ui;
+    void paintEvent(QPaintEvent *ev);
+};
+
+#endif // CHESSBUTTON_H
+
+
+
+
+
+
+
+#include "chessbutton.h"
+#include "ui_chessbutton.h"
+#include <QPainter>
+#include <QRadialGradient>
+
+
+Chessbutton::Chessbutton(QWidget *parent) :
+    QWidget(parent),
+    ui(new Ui::Chessbutton)
+{
+    ui->setupUi(this);
+    setFixedSize(parent->height()*2,parent->width()*2);
+    setAttribute(Qt::WA_TransparentForMouseEvents,true);
+
+    //setWindowFlags(Qt::FramelessWindowHint);
+    //setAttribute(Qt::WA_TranslucentBackground);
+}
+
+Chessbutton::~Chessbutton()
+{
+    delete ui;
+}
+void Chessbutton::paintEvent(QPaintEvent *ev)
+{
+    QPainter painter(this);
+    painter.fillRect(this->rect(), QColor(0, 0, 255, 0));
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    for(int i=0;i<10;i++)
+        for(int j=0;j<10;j++)
+        {
+            if(chess[i][j]!=0)
+            {
+
+                QRadialGradient radialGradient(80*j+60,80*i+60, 50, 80*j+60,80*i+60);
+                if(chess[i][j]%2==1)
+                {
+                    if(chess[i][j]==3)
+                    {QPen pen(Qt::gray, 5, Qt::DashDotLine, Qt::RoundCap, Qt::RoundJoin);painter.setPen(pen);}
+                    radialGradient.setColorAt(0.0, Qt::white);
+                    radialGradient.setColorAt(0.8, Qt::black);
+                    painter.setBrush(QBrush(radialGradient));
+
+                }
+
+                if(chess[i][j]%2==0)
+                {
+                    //white
+                    painter.setPen(Qt::black);
+                    if(chess[i][j]==4)
+                    {
+                        QPen pen(Qt::black, 5, Qt::DashDotLine, Qt::RoundCap, Qt::RoundJoin);
+                        painter.setPen(pen);
+                    }
+
+                    radialGradient.setColorAt(0.0, Qt::gray);
+                    radialGradient.setColorAt(1.0, Qt::white);
+                    painter.setBrush(QBrush(radialGradient));
+                }
+                painter.drawEllipse ( 80*j+33,80*i+33,70,70 );
+
+            }
+
+        }
+
+
+}
