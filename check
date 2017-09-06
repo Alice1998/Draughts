@@ -1,0 +1,170 @@
+// test.cpp : 定义控制台应用程序的入口点。
+//
+
+#include "stdafx.h"
+#include <iostream>
+#include <cmath>
+#include <string>
+#include <vector>
+#include <ctime>
+#include <cstdlib>
+#include <iomanip>
+using namespace std;
+int chess[10][10];
+int inputx, inputy;
+int nextcount[100] = { 0 }, nextdown[100] = { 0 }, nextup[10] = { 0 };
+int nextbuttonx[100][4] = { 0 };
+int nextbuttony[100][4] = { 0 };
+
+int cnt = 0;
+int chesscolor = 1;
+
+int linex[20] = { 0 };
+int liney[20] = { 0 };
+int linecount = 0;
+int eat[10] = { 0 };
+int eatlinex[10][20] = { 0 };
+int eatliney[10][20] = { 0 };
+int ways = 0;
+
+
+void print()
+{
+	for(int i = 0; i < 10; i++)
+	{
+		for (int j = 0; j < 10; j++)
+			cout << chess[i][j] << "  ";
+		cout << endl<<endl;
+	}
+}
+void input()
+{
+
+	cout << "want x y" << endl;
+	cin >> inputx;
+	cin >> inputy;
+
+}
+void getnext(int x, int y)
+{
+	nextcount[cnt] = 0;
+	nextdown[cnt] = 0;
+	nextup[cnt] = 0;
+	if (x>0 && y>0)
+	{
+		nextbuttonx[cnt][nextcount[cnt]] = x - 1, nextbuttony[cnt][nextcount[cnt]] = y - 1;
+		nextcount[cnt]++;
+		nextup[cnt]++;
+	}
+	if (x>0 && y<9)
+		nextbuttonx[cnt][nextcount[cnt]] = x - 1, nextbuttony[cnt][nextcount[cnt]] = y + 1, nextcount[cnt]++, nextup[cnt]++;
+	if (x<9 && y>0)
+		nextbuttonx[cnt][nextcount[cnt]] = x + 1, nextbuttony[cnt][nextcount[cnt]] = y - 1, nextcount[cnt]++, nextdown[cnt]++;
+	if (x<9 && y<9)
+		nextbuttonx[cnt][nextcount[cnt]] = x + 1, nextbuttony[cnt][nextcount[cnt]] = y + 1, nextcount[cnt]++, nextdown[cnt]++;
+	cnt++;
+}
+
+void checknext(int x, int y)
+{
+	
+	getnext(x, y);
+	int havechess = 0;
+	int tempt = cnt;
+	for (int i = 0; i < nextcount[tempt-1]; i++)
+	{
+		if (chess[nextbuttonx[tempt - 1][i]][nextbuttony[tempt - 1][i]] == chesscolor % 2+1 && chess[nextbuttonx[tempt - 1][i]][nextbuttony[tempt - 1][i]]!=0)// chesscolor————————————
+		{
+			chess[nextbuttonx[tempt - 1][i]][nextbuttony[tempt - 1][i]] = chess[nextbuttonx[tempt - 1][i]][nextbuttony[tempt - 1][i]] + 4;
+			getnext(nextbuttonx[tempt-1][i],nextbuttony[tempt-1][i]);
+			for (int j = 0; j < nextcount[cnt - 1];j ++)
+			{
+				if (chess[nextbuttonx[cnt - 1][j]][nextbuttony[cnt - 1][j]] == 0)
+				{
+					havechess = 1;
+					linex[linecount] = nextbuttonx[cnt - 1][j];
+					liney[linecount] = nextbuttony[cnt - 1][j];
+					linecount++;
+					int temp = linecount - 1;
+					chess[linex[linecount-1]][liney[linecount-1]] = chesscolor;
+					checknext(linex[linecount-1], liney[linecount-1]);
+					chess[linex[temp]][liney[temp]] = 0;
+					linecount = temp;
+					linex[linecount] = 0;
+					linex[linecount] = 0;
+					
+				}
+				
+			}
+			chess[nextbuttonx[tempt - 1][i]][nextbuttony[tempt - 1][i]] = chess[nextbuttonx[tempt - 1][i]][nextbuttony[tempt - 1][i]] - 4;
+		}
+		else
+		{
+			if (eat[ways-1] == linecount&&linecount>0)
+			{
+				int flag = 1;
+				for (int x = 0; x < eat[ways]; x++)
+				{
+					if (eatlinex[ways - 1][x] != linex[i] || eatliney[ways - 1][x] != liney[i])
+					{
+						flag = 0;
+						break;
+					}
+				}
+				if (flag == 0)
+				{
+					eat[ways] = linecount;
+					for (int i = 0; i < linecount; i++)
+						eatlinex[ways][i] = linex[i], eatliney[ways][i] = liney[i];
+					cout << eat[ways] << endl;
+					for (int i = 0; i < eat[ways]; i++)
+						cout << eatlinex[ways][i] << " " << eatliney[ways][i] << endl;
+					ways++;
+					print();
+				}
+				
+			}
+
+			if (eat[ways-1] < linecount)
+			{
+				eat[ways] = linecount;
+				for (int i = 0; i < linecount; i++)
+					eatlinex[ways][i] = linex[i], eatliney[ways][i] = liney[i];
+				cout << eat[ways] << endl;
+				for (int i = 0; i < eat[ways]; i++)
+					cout << eatlinex[ways][i] << " " << eatliney[ways][i] << endl;
+				ways++;
+				print();
+			}
+			
+		}
+		
+	}
+	
+
+}
+int main()
+{
+	for (int i = 0; i < 10;i++)
+	for (int j = 0; j < 10; j++)
+	{
+		chess[i][j] = 0;
+		if (i % 2 == 0 && j % 2 == 1 || i % 2 == 1 && j % 2 == 0)
+		{
+			if (i < 4)
+				chess[i][j] = 1;
+			if (i>5)
+				chess[i][j] = 2;
+		}
+	}
+	chess[5][2] = 1;
+	chess[3][0] = 0;
+
+	print();
+	//input();
+	checknext(5, 2);
+	cout << ways;
+	
+	system("pause");
+	return 0;
+}
