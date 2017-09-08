@@ -12,7 +12,7 @@
 using namespace std;
 int chess[10][10];
 int inputx, inputy;
-int nextcount[100] = { 0 }, nextdown[100] = { 0 }, nextup[10] = { 0 };
+int nextcount[1000] = { 0 }, nextdown[1000] = { 0 }, nextup[1000] = { 0 };
 int nextbuttonx[100][4] = { 0 };
 int nextbuttony[100][4] = { 0 };
 
@@ -45,6 +45,7 @@ void input()
 	cin >> inputy;
 
 }
+
 void getnext(int x, int y)
 {
 	nextcount[cnt] = 0;
@@ -64,8 +65,7 @@ void getnext(int x, int y)
 		nextbuttonx[cnt][nextcount[cnt]] = x + 1, nextbuttony[cnt][nextcount[cnt]] = y + 1, nextcount[cnt]++, nextdown[cnt]++;
 	cnt++;
 }
-
-void checknext(int x, int y)
+int checknext(int x, int y)
 {
 	
 	getnext(x, y);
@@ -100,12 +100,12 @@ void checknext(int x, int y)
 		}
 		else
 		{
-			if (eat[ways-1] == linecount&&linecount>0)
+			if (eat[ways] == linecount&&linecount>0)
 			{
 				int flag = 1;
 				for (int x = 0; x < eat[ways]; x++)
 				{
-					if (eatlinex[ways - 1][x] != linex[i] || eatliney[ways - 1][x] != liney[i])
+					if (eatlinex[ways][x] != linex[x] || eatliney[ways][x] != liney[x])
 					{
 						flag = 0;
 						break;
@@ -113,19 +113,20 @@ void checknext(int x, int y)
 				}
 				if (flag == 0)
 				{
+					ways++;
 					eat[ways] = linecount;
 					for (int i = 0; i < linecount; i++)
 						eatlinex[ways][i] = linex[i], eatliney[ways][i] = liney[i];
 					cout << eat[ways] << endl;
 					for (int i = 0; i < eat[ways]; i++)
 						cout << eatlinex[ways][i] << " " << eatliney[ways][i] << endl;
-					ways++;
+					cout << ways << endl;
 					print();
 				}
 				
 			}
 
-			if (eat[ways-1] < linecount)
+			if (eat[ways] < linecount)
 			{
 				eat[ways] = linecount;
 				for (int i = 0; i < linecount; i++)
@@ -133,14 +134,59 @@ void checknext(int x, int y)
 				cout << eat[ways] << endl;
 				for (int i = 0; i < eat[ways]; i++)
 					cout << eatlinex[ways][i] << " " << eatliney[ways][i] << endl;
-				ways++;
+				cout << ways << endl;
 				print();
+				
 			}
 			
 		}
 		
 	}
-	
+	int max = 0, indexmax;
+	for (int i = 0; i <= ways; i++)
+	if (eat[i]>max)
+		max = eat[i], indexmax = i;
+	return indexmax;
+
+}
+void finalcheck(int x, int y)
+{
+	int eatindex=checknext(x, y);
+	if (eat[eatindex]>0)
+	{
+		
+	}
+	else
+	{
+		getnext(x, y);
+		if (chesscolor % 2 == 1)
+		{
+			for (int i = 0; i < nextdown[cnt]; i++)
+			{
+				//...down
+
+				
+
+			}
+
+		}
+		else
+		{
+			//up
+
+		}
+		nextcount[cnt] = 0;
+		nextdown[cnt] = 0;
+		nextup[cnt] = 0;
+		nextbuttonx[cnt][4] = { 0 };
+		nextbuttony[cnt][4] = { 0 };
+		cnt--;
+
+	}
+	eat[10] = { 0 };
+	eatlinex[10][20] = { 0 };
+	eatliney[10][20] = { 0 };
+	ways = 0;
 
 }
 int main()
@@ -162,8 +208,15 @@ int main()
 
 	print();
 	//input();
-	checknext(5, 2);
-	cout << ways;
+	finalcheck(5, 2);
+	cout << ways << endl;
+	for (int i = 0; i <= ways; i++)
+	{
+		for (int j = 0; j < eat[i]; j++)
+			cout << eatlinex[i][j] << " " << eatliney[i][j] << "   ";
+		cout << endl;
+
+	}
 	
 	system("pause");
 	return 0;
