@@ -12,11 +12,21 @@
 using namespace std;
 int chess[10][10];
 int inputx, inputy;
-int nextcount[1000] = { 0 }, nextdown[1000] = { 0 }, nextup[1000] = { 0 };
-int nextbuttonx[100][4] = { 0 };
-int nextbuttony[100][4] = { 0 };
-
+int nextcount[10000] = { 0 }, nextdown[10000] = { 0 }, nextup[10000] = { 0 };
+int nextbuttonx[10000][4] = { 0 };
+int nextbuttony[10000][4] = { 0 };
+int nextx[10000][4] = { 0 };
+int nexty[10000][4] = { 0 };
 int cnt = 0;
+
+int nextcountking[10000] = { 0 };
+int nextbuttonxking[10000][30] = { 0 };
+int nextbuttonyking[10000][30] = { 0 };
+int cntking = 0;
+int nextxking[10000][30] = { 0 };
+int nextyking[10000][30] = { 0 };
+
+
 int chesscolor = 1;
 
 int linex[20] = { 0 };
@@ -39,13 +49,21 @@ void print()
 }
 void input()
 {
-
-	cout << "want x y" << endl;
+	int color;
+	cout << "colcr x y" << endl;
+	cin >> color;
 	cin >> inputx;
 	cin >> inputy;
+		chess[inputx][inputy] = color;
 
 }
-
+void initeat()
+{
+	eat[10] = { 0 };
+	eatlinex[10][20] = { 0 };
+	eatliney[10][20] = { 0 };
+	ways = 0;
+}
 void getnext(int x, int y)
 {
 	nextcount[cnt] = 0;
@@ -65,6 +83,9 @@ void getnext(int x, int y)
 		nextbuttonx[cnt][nextcount[cnt]] = x + 1, nextbuttony[cnt][nextcount[cnt]] = y + 1, nextcount[cnt]++, nextdown[cnt]++;
 	cnt++;
 }
+
+//check white for black term
+/*
 int checknext(int x, int y)
 {
 	
@@ -73,20 +94,22 @@ int checknext(int x, int y)
 	int tempt = cnt;
 	for (int i = 0; i < nextcount[tempt-1]; i++)
 	{
-		if (chess[nextbuttonx[tempt - 1][i]][nextbuttony[tempt - 1][i]] == chesscolor % 2+1 && chess[nextbuttonx[tempt - 1][i]][nextbuttony[tempt - 1][i]]!=0)// chesscolor————————————
+		if (chess[nextbuttonx[tempt - 1][i]][nextbuttony[tempt - 1][i]] == 2||chess[nextbuttonx[tempt - 1][i]][nextbuttony[tempt - 1][i]]==4)// chesscolor————————————
 		{
 			chess[nextbuttonx[tempt - 1][i]][nextbuttony[tempt - 1][i]] = chess[nextbuttonx[tempt - 1][i]][nextbuttony[tempt - 1][i]] + 4;
 			getnext(nextbuttonx[tempt-1][i],nextbuttony[tempt-1][i]);
-			for (int j = 0; j < nextcount[cnt - 1];j ++)
+			int tt = cnt;
+			for (int j = 0; j < nextcount[tt - 1];j ++)
 			{
-				if (chess[nextbuttonx[cnt - 1][j]][nextbuttony[cnt - 1][j]] == 0)
+				if (chess[nextbuttonx[tt - 1][j]][nextbuttony[tt - 1][j]] == 0)
 				{
 					havechess = 1;
-					linex[linecount] = nextbuttonx[cnt - 1][j];
-					liney[linecount] = nextbuttony[cnt - 1][j];
+					linex[linecount] = nextbuttonx[tt - 1][j];
+					liney[linecount] = nextbuttony[tt - 1][j];
 					linecount++;
 					int temp = linecount - 1;
-					chess[linex[linecount-1]][liney[linecount-1]] = chesscolor;
+					chess[linex[linecount-1]][liney[linecount-1]] = 1;
+					// turn back!!
 					checknext(linex[linecount-1], liney[linecount-1]);
 					chess[linex[temp]][liney[temp]] = 0;
 					linecount = temp;
@@ -148,67 +171,448 @@ int checknext(int x, int y)
 		max = eat[i], indexmax = i;
 	return indexmax;
 
-}
-void finalcheck(int x, int y)
-{
-	int eatindex=checknext(x, y);
-	if (eat[eatindex]>0)
-	{
-		
-	}
-	else
-	{
-		getnext(x, y);
-		if (chesscolor % 2 == 1)
-		{
-			for (int i = 0; i < nextdown[cnt]; i++)
-			{
-				//...down
+}*/
 
-				
+void newgetnext(int x, int y)//to black and white
+{
+	nextcount[cnt] = 0;
+	nextdown[cnt] = 0;
+	nextup[cnt] = 0;
+	if (x>1 && y>1&&chess[x-2][y-2]==0)
+	{
+		nextbuttonx[cnt][nextcount[cnt]] = x - 1, nextbuttony[cnt][nextcount[cnt]] = y - 1;
+		nextx[cnt][nextcount[cnt]] = -1, nexty[cnt][nextcount[cnt]] = -1;
+		nextcount[cnt]++;
+		nextup[cnt]++;
+	}
+	if (x > 1 && y < 8 && chess[x - 2][y + 2] == 0)
+	{
+		nextbuttonx[cnt][nextcount[cnt]] = x - 1, nextbuttony[cnt][nextcount[cnt]] = y + 1,
+			nextx[cnt][nextcount[cnt]] = -1, nexty[cnt][nextcount[cnt]] = 1, nextcount[cnt]++, nextup[cnt]++;
+	}
+		
+	if (x<8 && y>1 && chess[x + 2][y - 2] == 0)
+	{
+		nextbuttonx[cnt][nextcount[cnt]] = x + 1, nextbuttony[cnt][nextcount[cnt]] = y - 1,
+			nextx[cnt][nextcount[cnt]] = 1, nexty[cnt][nextcount[cnt]] = -1, nextcount[cnt]++, nextdown[cnt]++;
+	}
+	if (x < 8 && y < 8 && chess[x + 2][y + 2] == 0)
+	{
+		nextbuttonx[cnt][nextcount[cnt]] = x + 1, nextbuttony[cnt][nextcount[cnt]] = y + 1,
+			nextx[cnt][nextcount[cnt]] = 1, nexty[cnt][nextcount[cnt]] = 1, nextcount[cnt]++, nextdown[cnt]++;
+	}
+	cnt++;
+}
+//black only
+int eatnext(int x,int y)
+{
+	newgetnext(x, y);
+	int havechess = 0;
+	int tempt = cnt;
+	for (int i = 0; i < nextcount[tempt - 1]; i++)
+	{
+		if (chess[nextbuttonx[tempt - 1][i]][nextbuttony[tempt - 1][i]] == 2 || chess[nextbuttonx[tempt - 1][i]][nextbuttony[tempt - 1][i]] == 4)
+		{
+			chess[nextbuttonx[tempt - 1][i]][nextbuttony[tempt - 1][i]] = chess[nextbuttonx[tempt - 1][i]][nextbuttony[tempt - 1][i]] + 4;
+			havechess = 1;
+			linex[linecount] = nextbuttonx[tempt - 1][i] + nextx[tempt - 1][i];
+			liney[linecount] = nextbuttony[tempt - 1][i] + nexty[tempt - 1][i];
+			linecount++;
+			int temp = linecount - 1;
+			chess[linex[linecount - 1]][liney[linecount - 1]] = 1;
+			eatnext(linex[linecount - 1], liney[linecount - 1]);
+			chess[linex[temp]][liney[temp]] = 0;
+			linecount = temp;
+			linex[linecount] = 0;
+			linex[linecount] = 0;
+			chess[nextbuttonx[tempt - 1][i]][nextbuttony[tempt - 1][i]] = chess[nextbuttonx[tempt - 1][i]][nextbuttony[tempt - 1][i]] - 4;
+		}
+
+		else
+		{
+			if (eat[ways] == linecount&&linecount>0)
+			{
+				int flag = 1;
+				for (int x = 0; x < eat[ways]; x++)
+				{
+					if (eatlinex[ways][x] != linex[x] || eatliney[ways][x] != liney[x])
+					{
+						flag = 0;
+						break;
+					}
+				}
+				if (flag == 0)
+				{
+					ways++;
+					eat[ways] = linecount;
+					for (int i = 0; i < linecount; i++)
+						eatlinex[ways][i] = linex[i], eatliney[ways][i] = liney[i];
+					cout << eat[ways] << endl;
+					for (int i = 0; i < eat[ways]; i++)
+						cout << eatlinex[ways][i] << " " << eatliney[ways][i] << endl;
+					cout << ways << endl;
+					print();
+				}
+
+			}
+
+			if (eat[ways] < linecount)
+			{
+				eat[ways] = linecount;
+				for (int i = 0; i < linecount; i++)
+					eatlinex[ways][i] = linex[i], eatliney[ways][i] = liney[i];
+				cout << eat[ways] << endl;
+				for (int i = 0; i < eat[ways]; i++)
+					cout << eatlinex[ways][i] << " " << eatliney[ways][i] << endl;
+				cout << ways << endl;
+				print();
 
 			}
 
 		}
+	}
+
+
+	int max = 0, indexmax=0;
+	for (int i = 0; i <= ways; i++)
+	if (eat[i]>max)
+		max = eat[i], indexmax = i;
+	return indexmax;
+}
+void getnextking(int x, int y)
+{
+	int xx = x, yy = y;
+	nextcountking[cntking] = 0;
+	while (xx > 0 && yy > 0)
+	{
+		xx--;
+		yy--;
+		nextbuttonxking[cntking][nextcountking[cntking]] = xx;
+		nextbuttonyking[cntking][nextcountking[cntking]] = yy;
+		nextcountking[cntking]++;
+	}
+	xx = x;
+	yy = y;
+	while (xx > 0 && yy < 9)
+	{
+		xx--;
+		yy++;
+		nextbuttonxking[cntking][nextcountking[cntking]] = xx;
+		nextbuttonyking[cntking][nextcountking[cntking]] = yy;
+		nextcountking[cntking]++;
+	}
+	xx = x;
+	yy = y;
+	while (xx <9 && yy < 9)
+	{
+		xx++;
+		yy++;
+		nextbuttonxking[cntking][nextcountking[cntking]] = xx;
+		nextbuttonyking[cntking][nextcountking[cntking]] = yy;
+		nextcountking[cntking]++;
+	}
+	xx = x;
+	yy = y;
+	while (xx <9 && yy >0)
+	{
+		xx++;
+		yy--;
+		nextbuttonxking[cntking][nextcountking[cntking]] = xx;
+		nextbuttonyking[cntking][nextcountking[cntking]] = yy;
+		nextcountking[cntking]++;
+	}
+	cntking++;
+}
+
+void newgetnextking(int x, int y)
+{
+	int xx = x, yy = y;
+	nextcountking[cntking] = 0;
+	while (xx > 1 && yy > 1)
+	{
+		xx--;
+		yy--;
+		nextbuttonxking[cntking][nextcountking[cntking]] = xx;
+		nextbuttonyking[cntking][nextcountking[cntking]] = yy;
+		nextxking[cntking][nextcountking[cntking]] = -1;
+		nextyking[cntking][nextcountking[cntking]] = -1;
+		nextcountking[cntking]++;
+	}
+	xx = x;
+	yy = y;
+	while (xx > 1 && yy < 8)
+	{
+		xx--;
+		yy++;
+		nextbuttonxking[cntking][nextcountking[cntking]] = xx;
+		nextbuttonyking[cntking][nextcountking[cntking]] = yy;
+		nextxking[cntking][nextcountking[cntking]] = -1;
+		nextyking[cntking][nextcountking[cntking]] = 1;
+		nextcountking[cntking]++;
+	}
+	xx = x;
+	yy = y;
+	while (xx <8 && yy < 8)
+	{
+		xx++;
+		yy++;
+		nextbuttonxking[cntking][nextcountking[cntking]] = xx;
+		nextbuttonyking[cntking][nextcountking[cntking]] = yy;
+		nextxking[cntking][nextcountking[cntking]] =1;
+		nextyking[cntking][nextcountking[cntking]] = 1;
+		nextcountking[cntking]++;
+	}
+	xx = x;
+	yy = y;
+	while (xx <8 && yy >1)
+	{
+		xx++;
+		yy--;
+		nextbuttonxking[cntking][nextcountking[cntking]] = xx;
+		nextbuttonyking[cntking][nextcountking[cntking]] = yy;
+		nextxking[cntking][nextcountking[cntking]] = 1;
+		nextyking[cntking][nextcountking[cntking]] = -1;
+		nextcountking[cntking]++;
+	}
+	cntking++;
+}
+int checkeatking(int x,int y)
+{
+	initeat();
+	newgetnextking(x, y);
+	int havechess = 0;
+	int tempt = cntking;
+	for (int i = 0; i < nextcountking[tempt - 1]; i++)
+	{
+		if (chess[nextbuttonxking[tempt - 1][i]][nextbuttonyking[tempt - 1][i]] == 2 || chess[nextbuttonxking[tempt - 1][i]][nextbuttonyking[tempt - 1][i]] == 4)// chesscolor————————————
+		{
+			chess[nextbuttonxking[tempt - 1][i]][nextbuttonyking[tempt - 1][i]] = chess[nextbuttonxking[tempt - 1][i]][nextbuttonyking[tempt - 1][i]] + 4;
+			//getnextking(nextbuttonxking[tempt - 1][i], nextbuttonyking[tempt - 1][i]);
+			int xx = nextbuttonxking[tempt - 1][i] + nextxking[tempt - 1][i];
+			int yy = nextbuttonyking[tempt - 1][i] + nextyking[tempt - 1][i];
+			while (x>-1 && x<10 && y>-1 && y < 10)
+			{
+				if (chess[xx][yy] == 0)
+				{
+					havechess = 1;
+					linex[linecount] = xx;
+					liney[linecount] = yy;
+					linecount++;
+					int temp = linecount - 1;
+					chess[xx][yy] = 3;
+					checkeatking(xx, yy);
+					chess[linex[temp]][liney[temp]] = 0;
+					linecount = temp;
+					linex[linecount] = 0;
+					linex[linecount] = 0;
+				}
+				xx = xx + nextxking[tempt - 1][i];
+				yy = yy + nextyking[tempt - 1][i];
+			}
+			chess[nextbuttonxking[tempt - 1][i]][nextbuttonyking[tempt - 1][i]] = chess[nextbuttonxking[tempt - 1][i]][nextbuttonyking[tempt - 1][i]] - 4;
+			
+		}
 		else
 		{
-			//up
+			if (eat[ways] == linecount&&linecount>0)
+			{
+				int flag = 1;
+				for (int x = 0; x < eat[ways]; x++)
+				{
+					if (eatlinex[ways][x] != linex[x] || eatliney[ways][x] != liney[x])
+					{
+						flag = 0;
+						break;
+					}
+				}
+				if (flag == 0)
+				{
+					ways++;
+					eat[ways] = linecount;
+					for (int i = 0; i < linecount; i++)
+						eatlinex[ways][i] = linex[i], eatliney[ways][i] = liney[i];
+					cout << eat[ways] << endl;
+					for (int i = 0; i < eat[ways]; i++)
+						cout << eatlinex[ways][i] << " " << eatliney[ways][i] << endl;
+					cout << ways << endl;
+					print();
+				}
+
+			}
+
+			if (eat[ways] < linecount)
+			{
+				eat[ways] = linecount;
+				for (int i = 0; i < linecount; i++)
+					eatlinex[ways][i] = linex[i], eatliney[ways][i] = liney[i];
+				cout << eat[ways] << endl;
+				for (int i = 0; i < eat[ways]; i++)
+					cout << eatlinex[ways][i] << " " << eatliney[ways][i] << endl;
+				cout << ways << endl;
+				print();
+
+			}
 
 		}
-		nextcount[cnt] = 0;
-		nextdown[cnt] = 0;
-		nextup[cnt] = 0;
-		nextbuttonx[cnt][4] = { 0 };
-		nextbuttony[cnt][4] = { 0 };
-		cnt--;
 
 	}
-	eat[10] = { 0 };
-	eatlinex[10][20] = { 0 };
-	eatliney[10][20] = { 0 };
-	ways = 0;
+	int max = 0, indexmax;
+	for (int i = 0; i <= ways; i++)
+	if (eat[i]>max)
+		max = eat[i], indexmax = i;
+	return indexmax;
 
 }
-int main()
+int checkeatwhole()
 {
-	for (int i = 0; i < 10;i++)
-	for (int j = 0; j < 10; j++)
+	int flag[10] = { 0 };
+	int eatnumber = 0;
+	int x[10] = { 0 }, y[10] = { 0 };
+	int index = 0;
+	for (int i = 0; i<10;i++)
+	for (int j = 0; j<10; j++)
 	{
-		chess[i][j] = 0;
-		if (i % 2 == 0 && j % 2 == 1 || i % 2 == 1 && j % 2 == 0)
+		if (chess[i][j] == 1)
 		{
-			if (i < 4)
-				chess[i][j] = 1;
-			if (i>5)
-				chess[i][j] = 2;
+			initeat();
+			int eatindex = eatnext(i, j);//
+			if (eat[eatindex]>eatnumber)
+			{
+				for (int xx = 0; xx < index; xx++)
+				{
+					x[xx] = 0;
+					y[xx] = 0;
+					flag[xx] = 0;
+				}
+				eatnumber = eat[eatindex];
+				x[0] = i;
+				y[0] = j;
+				index = 1;
+				flag[0] = 1;
+			}
+			if (eat[eatindex] == eatnumber&&eatnumber!=0)
+			{
+				flag[index] = 1;
+				x[index] = i;
+				y[index] = j;
+				index++;
+			}
+		}
+		if (chess[i][j] == 3)
+		{
+			//...
+			initeat();
+			int eatindex = checkeatking(i, j);//
+			if (eat[eatindex]>eatnumber)
+			{
+				for (int xx = 0; xx < index; xx++)
+				{
+					x[xx] = 0;
+					y[xx] = 0;
+					flag[xx] = 0;
+				}
+				eatnumber = eat[eatindex];
+				x[0] = i;
+				y[0] = j;
+				index = 1;
+				flag[0] = 2;
+			}
+			if (eat[eatindex] == eatnumber&&eatnumber != 0)
+			{
+				flag[index] = 2;
+				x[index] = i;
+				y[index] = j;
+				index++;
+			}
 		}
 	}
-	chess[5][2] = 1;
-	chess[3][0] = 0;
+	if (flag[0] > 0)
+	{
+		//highlight x y
 
-	print();
-	//input();
-	finalcheck(5, 2);
+		return flag[0];
+	}
+	return 0;
+}
+void finalcheck(int x, int y)//every chess
+{
+	initeat();
+	if (chess[x][y] == 1)
+	{
+		int eatindex = eatnext(x, y);
+		if (eat[eatindex]>0)
+		{
+			//highlight
+			
+			//after chooose haveeat linex y
+		}
+		else
+		{
+			getnext(x, y);
+			//black down
+			for (int i = 0; i < nextdown[cnt - 1]; i++)
+			{
+				if (chess[nextbuttonx[cnt - 1][i]][nextbuttony[cnt - 1][i]] == 0)
+				{
+					//highlight
+				}
+
+			}
+
+		}
+		//for (int i = 0; i < cnt; i++)
+		//{
+		nextcount[1000] = { 0 };
+			nextbuttonx[1000][4] = { 0 };
+			nextbuttony[1000][4] = { 0 };
+			nextx[1000][4] = { 0 };
+			nexty[1000][4] = { 0 };
+		//}
+		cnt = 0;
+	}
+	
+	if (chess[x][y] == 3)
+	{
+		int eatindex = checkeatking(x, y);
+		if (eat[eatindex]>0)
+		{
+			//
+
+			//afterchoose
+
+		}
+		else
+		{
+			getnextking(x, y);
+			//black down
+			for (int i = 0; i < nextcountking[cntking - 1]; i++)
+			{
+				if (chess[nextbuttonxking[cntking - 1][i]][nextbuttony[cnt - 1][i]] == 0)//————————————————
+				{
+					//highlight
+				}
+
+			}
+		}
+		//for (int i = 0; i < cntking; i++)
+		//{
+		   nextcountking[10000] = { 0 };
+			nextbuttonxking[10000][30] = { 0 };
+			nextbuttonyking[10000][30] = { 0 };
+		//}
+		cntking = 0;
+	}
+
+	for (int i = 0; i < 10; i++)
+	{
+		if (chess[0][i] == 2)
+		{
+			chess[0][i] = 4;
+		}
+		if (chess[9][i] == 1)
+			chess[9][i] = 3;
+	}
+
 	cout << ways << endl;
 	for (int i = 0; i <= ways; i++)
 	{
@@ -217,6 +621,53 @@ int main()
 		cout << endl;
 
 	}
+
+
+	initeat();
+
+}
+int main()
+{
+	for (int i = 0; i < 10;i++)
+	for (int j = 0; j < 10; j++)
+	{
+		chess[i][j] = 0;
+		/*if (i % 2 == 0 && j % 2 == 1 || i % 2 == 1 && j % 2 == 0)
+		{
+			if (i < 4)
+				chess[i][j] = 1;
+			if (i>5)
+				chess[i][j] = 2;
+		}*/
+	}
+	//chess[5][2] = 1;
+	//chess[3][0] = 0;
+
+	//for (int i = 0; i < 10;i++)
+	//	input();
+	
+	chess[1][2] = 2;
+	chess[3][2] = 2;
+	chess[5][2] = 2;
+	chess[7][2] = 2;
+	chess[4][3] = 1;
+	chess[6][5] = 2;
+	chess[8][5] = 1;
+	chess[1][6] = 1;
+	chess[1][8] = 1;
+	chess[2][9] = 2;
+	print();
+	eatnext(4, 3);
+	
+	cout << ways << endl;
+	for (int i = 0; i <= ways; i++)
+	{
+		for (int j = 0; j < eat[i]; j++)
+			cout << eatlinex[i][j] << " " << eatliney[i][j] << "   ";
+		cout << endl;
+
+	}
+
 	
 	system("pause");
 	return 0;
